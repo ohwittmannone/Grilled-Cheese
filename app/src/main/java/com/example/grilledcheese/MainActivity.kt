@@ -4,8 +4,8 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.grilledcheese.api.RedditGrilledCheeseAdapter
-import com.example.grilledcheese.model.GrilledCheeseRepository
+import com.example.grilledcheese.api.RedditAdapter
+import com.example.grilledcheese.model.RedditItemRepository
 import com.example.grilledcheese.model.GrilledCheeseViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         val imagePreview = this.findViewById<ImageView>(R.id.preview_image)
         val button = this.findViewById<Button>(R.id.button_background)
 
-        val repository = GrilledCheeseRepository(RedditGrilledCheeseAdapter.create())
+        val repository = RedditItemRepository(RedditAdapter.create())
         val viewModel = GrilledCheeseViewModel(repository)
 
         button.setOnClickListener {
@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private fun setPreviewImage(viewModel: GrilledCheeseViewModel, imagePreview: ImageView) {
         launch {
             viewModel.grilledCheese().collectLatest {
-                setGlideImage(imagePreview, it.imgUrl)
+                setGlideImage(imagePreview, it.url)
             }
         }
     }
