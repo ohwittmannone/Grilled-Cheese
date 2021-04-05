@@ -1,24 +1,39 @@
 package com.example.grilledcheese
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import com.example.grilledcheese.api.GrilledCheeseService
+import android.widget.Button
+import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
 import com.example.grilledcheese.api.RedditGrilledCheeseAdapter
 import com.example.grilledcheese.model.GrilledCheeseRepository
 import com.example.grilledcheese.model.GrilledCheeseViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity() {
-
-    private lateinit var viewModel: GrilledCheeseViewModel
-    private lateinit var repository: GrilledCheeseRepository
+class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        repository = GrilledCheeseRepository(RedditGrilledCheeseAdapter.create())
-        viewModel = GrilledCheeseViewModel(repository)
+        val imagePreview = this.findViewById<ImageView>(R.id.preview_image)
+        val button = this.findViewById<Button>(R.id.button_background)
+
+        val repository = GrilledCheeseRepository(RedditGrilledCheeseAdapter.create())
+        val viewModel = GrilledCheeseViewModel(repository)
+
+        button.setOnClickListener {
+            setPreviewImage(viewModel, imagePreview)
+        }
+    }
+
+    private fun setPreviewImage(viewModel: GrilledCheeseViewModel, imagePreview: ImageView) {
+        launch {
+            viewModel.grilledCheese().collectLatest {
+                setGlideImage(imagePreview, it.imgUrl)
+            }
+        }
     }
 }

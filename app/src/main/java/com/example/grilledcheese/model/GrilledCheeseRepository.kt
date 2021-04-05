@@ -4,5 +4,5 @@ import com.example.grilledcheese.api.GrilledCheeseService
 
 class GrilledCheeseRepository(private val service: GrilledCheeseService) {
 
-    suspend fun getGrilledCheese() = service.getRandomGrilledCheese()
+    suspend fun getGrilledCheese() = service.getRandomGrilledCheese().first()
 }

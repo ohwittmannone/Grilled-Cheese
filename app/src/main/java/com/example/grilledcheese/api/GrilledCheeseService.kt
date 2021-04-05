@@ -10,20 +10,21 @@ import retrofit2.http.GET
 
 
 interface GrilledCheeseService {
-    @GET("r/grilledcheese/random.json?limit=1&raw_json=1")
-    suspend fun getRandomGrilledCheese(): GrilledCheese
+    @GET("/r/grilledcheese/random.json?limit=1&raw_json=1")
+    suspend fun getRandomGrilledCheese(): List<GrilledCheese>
 }
 
 object RedditGrilledCheeseAdapter {
 
     fun create(): GrilledCheeseService {
         val client = OkHttpClient.Builder()
-            .addInterceptor(StethoInterceptor())
+            .addNetworkInterceptor(StethoInterceptor())
             .build()
+
 
         return Retrofit.Builder()
             .baseUrl("https://ssl.reddit.com")
-            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
+            .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()
             .create(GrilledCheeseService::class.java)
