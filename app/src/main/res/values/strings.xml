@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Grilled Cheese</string>
+    <string name="app_welcome">Set your phone background to some cheesey goodness</string>
+    <string name="set_background">Set Background</string>
+</resources>
