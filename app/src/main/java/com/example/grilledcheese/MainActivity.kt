@@ -19,19 +19,31 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         setContentView(R.layout.activity_main)
 
         val imagePreview = this.findViewById<ImageView>(R.id.preview_image)
-        val button = this.findViewById<Button>(R.id.button_background)
+        val hotButton = this.findViewById<Button>(R.id.button_hot)
+        val randomButton = this.findViewById<Button>(R.id.button_random)
 
         val repository = RedditItemRepository(RedditAdapter.create())
         val viewModel = GrilledCheeseViewModel(repository)
 
-        button.setOnClickListener {
-            setPreviewImage(viewModel, imagePreview)
+        hotButton.setOnClickListener {
+            setHotPreviewImage(viewModel, imagePreview)
+        }
+        randomButton.setOnClickListener {
+            setRandomPreviewImage(viewModel, imagePreview)
         }
     }
 
-    private fun setPreviewImage(viewModel: GrilledCheeseViewModel, imagePreview: ImageView) {
+    private fun setHotPreviewImage(viewModel: GrilledCheeseViewModel, imagePreview: ImageView) {
         launch {
-            viewModel.grilledCheese().collectLatest {
+            viewModel.getHotGrilledCheese().collectLatest {
+                setGlideImage(imagePreview, it.url)
+            }
+        }
+    }
+
+    private fun setRandomPreviewImage(viewModel: GrilledCheeseViewModel, imagePreview: ImageView) {
+        launch {
+            viewModel.getRandomGrilledCheese().collectLatest {
                 setGlideImage(imagePreview, it.url)
             }
         }
