@@ -1,20 +1,24 @@
 package com.example.grilledcheese.model
 
 import androidx.lifecycle.ViewModel
+import com.example.grilledcheese.DefaultDispatcher
+import com.example.grilledcheese.DispatcherProvider
 import com.example.grilledcheese.data.GrilledCheese
 import com.example.grilledcheese.data.RandomGrilledCheese
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
-class GrilledCheeseViewModel(private val repository: RedditItemRepository) : ViewModel() {
+class GrilledCheeseViewModel(
+    private val repository: RedditItemRepository,
+    private val dispatcher: DispatcherProvider = DefaultDispatcher()
+) : ViewModel() {
 
     @ExperimentalCoroutinesApi
     suspend fun getHotGrilledCheese(): Flow<GrilledCheese> {
         return flow {
-            withContext(Dispatchers.Main) { //todo abstract Dispatcher
+            withContext(dispatcher.main()) { 
                 emit(checkHotGrilledCheese())
             }
         }
@@ -22,7 +26,7 @@ class GrilledCheeseViewModel(private val repository: RedditItemRepository) : Vie
 
     suspend fun getRandomGrilledCheese(): Flow<RandomGrilledCheese> {
         return flow {
-            withContext(Dispatchers.Main) {
+            withContext(dispatcher.main()) {
                 emit(checkRandomGrilledCheese())
             }
         }
