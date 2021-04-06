@@ -1,10 +1,11 @@
 package com.example.grilledcheese.model
 
 import androidx.lifecycle.ViewModel
-import com.example.grilledcheese.utils.DefaultDispatcher
-import com.example.grilledcheese.utils.DispatcherProvider
 import com.example.grilledcheese.data.GrilledCheese
 import com.example.grilledcheese.data.RandomGrilledCheese
+import com.example.grilledcheese.utils.DefaultDispatcher
+import com.example.grilledcheese.utils.DispatcherProvider
+import com.example.grilledcheese.utils.Resource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -16,18 +17,28 @@ class GrilledCheeseViewModel(
 ) : ViewModel() {
 
     @ExperimentalCoroutinesApi
-    suspend fun getHotGrilledCheese(): Flow<GrilledCheese> {
+    suspend fun getHotGrilledCheese(): Flow<Resource<GrilledCheese>> {
         return flow {
             withContext(dispatcher.main()) {
-                emit(checkHotGrilledCheese())
+                emit(Resource.loading())
+                try {
+                    emit(Resource.success(checkHotGrilledCheese()))
+                } catch (e: Exception) {
+                    emit(Resource.error(message = e.message))
+                }
             }
         }
     }
 
-    suspend fun getRandomGrilledCheese(): Flow<RandomGrilledCheese> {
+    suspend fun getRandomGrilledCheese(): Flow<Resource<RandomGrilledCheese>> {
         return flow {
             withContext(dispatcher.main()) {
-                emit(checkRandomGrilledCheese())
+                emit(Resource.loading())
+                try {
+                    emit(Resource.success(checkRandomGrilledCheese()))
+                } catch (e: Exception) {
+                    emit(Resource.error(message = e.message))
+                }
             }
         }
     }

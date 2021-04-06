@@ -41,11 +41,22 @@
 
     <ImageView
         android:id="@+id/preview_image"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="285dp"
+        android:layout_height="285dp"
+        android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@id/welcome_text"
         app:layout_constraintRight_toLeftOf="parent"
         app:layout_constraintLeft_toRightOf="parent"
         />
+
+    <ProgressBar
+        android:id="@+id/loading_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/welcome_text"
+        app:layout_constraintRight_toLeftOf="parent"
+        app:layout_constraintLeft_toRightOf="parent"
+        android:layout_marginBottom="120dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
