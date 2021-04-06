@@ -1,4 +1,4 @@
-package com.example.grilledcheese
+package com.example.grilledcheese.utils
 
 import android.widget.ImageView
 import com.bumptech.glide.Glide

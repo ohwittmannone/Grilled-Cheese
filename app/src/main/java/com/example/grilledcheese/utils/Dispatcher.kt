@@ -1,4 +1,4 @@
-package com.example.grilledcheese
+package com.example.grilledcheese.utils
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

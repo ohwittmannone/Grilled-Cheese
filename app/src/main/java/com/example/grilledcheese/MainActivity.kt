@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.grilledcheese.api.RedditAdapter
 import com.example.grilledcheese.model.RedditItemRepository
 import com.example.grilledcheese.model.GrilledCheeseViewModel
+import com.example.grilledcheese.utils.setGlideImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.collectLatest
@@ -36,7 +37,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private fun setHotPreviewImage(viewModel: GrilledCheeseViewModel, imagePreview: ImageView) {
         launch {
             viewModel.getHotGrilledCheese().collectLatest {
-                setGlideImage(imagePreview, it.url)
+                setGlideImage(
+                    imagePreview,
+                    it.url
+                )
             }
         }
     }
@@ -44,7 +48,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private fun setRandomPreviewImage(viewModel: GrilledCheeseViewModel, imagePreview: ImageView) {
         launch {
             viewModel.getRandomGrilledCheese().collectLatest {
-                setGlideImage(imagePreview, it.url)
+                setGlideImage(
+                    imagePreview,
+                    it.url
+                )
             }
         }
     }

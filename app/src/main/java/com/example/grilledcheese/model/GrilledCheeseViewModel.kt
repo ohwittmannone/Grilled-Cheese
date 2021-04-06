@@ -1,8 +1,8 @@
 package com.example.grilledcheese.model
 
 import androidx.lifecycle.ViewModel
-import com.example.grilledcheese.DefaultDispatcher
-import com.example.grilledcheese.DispatcherProvider
+import com.example.grilledcheese.utils.DefaultDispatcher
+import com.example.grilledcheese.utils.DispatcherProvider
 import com.example.grilledcheese.data.GrilledCheese
 import com.example.grilledcheese.data.RandomGrilledCheese
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,7 +18,7 @@ class GrilledCheeseViewModel(
     @ExperimentalCoroutinesApi
     suspend fun getHotGrilledCheese(): Flow<GrilledCheese> {
         return flow {
-            withContext(dispatcher.main()) { 
+            withContext(dispatcher.main()) {
                 emit(checkHotGrilledCheese())
             }
         }
