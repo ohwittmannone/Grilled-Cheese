@@ -3,4 +3,7 @@
     <string name="app_welcome">Set your phone background to some cheesey goodness</string>
     <string name="set_hot">Preview Today\'s Hot Grilled Cheese</string>
     <string name="set_random">Preview Random Grilled Cheese</string>
+    <string name="set_background">Set Phone Background</string>
+    <string name="preview_image_toast">Preview an image first</string>
+    <string name="image_set">Wallpaper being set, enjoy!</string>
 </resources>

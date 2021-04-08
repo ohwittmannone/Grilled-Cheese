@@ -10,11 +10,15 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.MutableStateFlow
 
+@ExperimentalCoroutinesApi
 class GrilledCheeseViewModel(
     private val repository: RedditItemRepository,
     private val dispatcher: DispatcherProvider = DefaultDispatcher()
 ) : ViewModel() {
+
+    val imageUrl = MutableStateFlow("")
 
     @ExperimentalCoroutinesApi
     suspend fun getHotGrilledCheese(): Flow<Resource<GrilledCheese>> {
@@ -22,7 +26,9 @@ class GrilledCheeseViewModel(
             withContext(dispatcher.main()) {
                 emit(Resource.loading())
                 try {
-                    emit(Resource.success(checkHotGrilledCheese()))
+                    val grilledCheese = checkHotGrilledCheese()
+                    imageUrl.value = grilledCheese.url
+                    emit(Resource.success(grilledCheese))
                 } catch (e: Exception) {
                     emit(Resource.error(message = e.message))
                 }
@@ -35,7 +41,9 @@ class GrilledCheeseViewModel(
             withContext(dispatcher.main()) {
                 emit(Resource.loading())
                 try {
-                    emit(Resource.success(checkRandomGrilledCheese()))
+                    val grilledCheese = checkRandomGrilledCheese()
+                    imageUrl.value = grilledCheese.url
+                    emit(Resource.success(grilledCheese))
                 } catch (e: Exception) {
                     emit(Resource.error(message = e.message))
                 }

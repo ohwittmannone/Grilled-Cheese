@@ -10,8 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.grilledcheese.api.RedditAdapter
 import com.example.grilledcheese.model.GrilledCheeseViewModel
 import com.example.grilledcheese.model.RedditItemRepository
-import com.example.grilledcheese.utils.Status
-import com.example.grilledcheese.utils.setGlideImage
+import com.example.grilledcheese.utils.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.MainScope
@@ -29,6 +28,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         val hotButton = this.findViewById<Button>(R.id.button_hot)
         val randomButton = this.findViewById<Button>(R.id.button_random)
         val spinner = this.findViewById<ProgressBar>(R.id.loading_spinner)
+        val setBackgroundButton = this.findViewById<Button>(R.id.button_set_background)
 
         val repository = RedditItemRepository(RedditAdapter.create())
         val viewModel = GrilledCheeseViewModel(repository)
@@ -38,6 +38,15 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         }
         randomButton.setOnClickListener {
             setRandomPreviewImage(viewModel, imagePreview, spinner)
+        }
+
+        setBackgroundButton.setOnClickListener {
+            if (viewModel.imageUrl.value != "") {
+                setWallpaper(this, viewModel.imageUrl.value)
+                showLongToast(this, R.string.image_set)
+            } else {
+                showLongToast(this, R.string.preview_image_toast)
+            }
         }
     }
 
