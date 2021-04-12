@@ -8,7 +8,7 @@ import com.example.grilledcheese.worker.startWorkManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 
-const val CANCEL_SELECTION = -1 //todo have this be persistent
+const val CANCEL_SELECTION = -1
 const val RANDOM_SELECTION = 0
 const val HOT_SELECTION = 1
 
@@ -28,11 +28,11 @@ class SelectTypeDialog(
             ) { dialog, which ->
                 when (which) {
                     RANDOM_SELECTION -> {
-                        model.dialogSelection.value = 0
+                        model.setDialogSelection(RANDOM_SELECTION)
                         dialog.dismiss()
                     }
                     HOT_SELECTION -> {
-                        model.dialogSelection.value = 1
+                        model.setDialogSelection(HOT_SELECTION)
                         dialog.dismiss()
                     }
                 }
@@ -45,7 +45,7 @@ class SelectTypeDialog(
 
 @ExperimentalCoroutinesApi
 suspend fun handleDialogSelection(viewModel: GrilledCheeseViewModel, context: Context) {
-    viewModel.dialogSelection.collectLatest { selection ->
+    viewModel.getDialogSelection().collectLatest { selection ->
         when (selection) {
             RANDOM_SELECTION -> {
                 viewModel.getRandomGrilledCheese().collectLatest {

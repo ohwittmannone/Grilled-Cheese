@@ -1,5 +1,6 @@
 package com.example.grilledcheese
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -17,6 +18,8 @@ import com.example.grilledcheese.utils.showLongToast
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
 
+const val DIALOG_SELECTION = "DIALOG_SELECTION"
+
 @ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
@@ -32,8 +35,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         val workerButton = this.findViewById<Button>(R.id.button_worker)
         val cancelButton = this.findViewById<Button>(R.id.button_cancel)
 
+        val dialogSelectionPrefs = IntPersistence(
+            DIALOG_SELECTION,
+            this.getSharedPreferences(DIALOG_SELECTION, Context.MODE_PRIVATE)
+        )
         val repository = RedditItemRepository(RedditAdapter.create())
-        val viewModel = GrilledCheeseViewModel(repository)
+        val viewModel = GrilledCheeseViewModel(repository, prefs = dialogSelectionPrefs)
         val dialog = SelectTypeDialog(this, viewModel)
 
         setButtonVisibility(viewModel, workerButton, cancelButton)
@@ -50,7 +57,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             }
         }
 
-        cancelButton.setOnClickListener { viewModel.dialogSelection.value = CANCEL_SELECTION }
+        cancelButton.setOnClickListener { viewModel.setDialogSelection(CANCEL_SELECTION)}
         workerButton.setOnClickListener { dialog.show() }
 
         launch {
@@ -112,7 +119,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         cancelButton: Button
     ) {
         launch {
-            viewModel.dialogSelection.collectLatest {
+            viewModel.getDialogSelection().collectLatest {
                 when (it) {
                     CANCEL_SELECTION -> {
                         workerButton.visibility = VISIBLE

@@ -1,6 +1,7 @@
 package com.example.grilledcheese.model
 
 import androidx.lifecycle.ViewModel
+import com.example.grilledcheese.IntPersistence
 import com.example.grilledcheese.data.GrilledCheese
 import com.example.grilledcheese.data.RandomGrilledCheese
 import com.example.grilledcheese.utils.DefaultDispatcher
@@ -15,11 +16,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @ExperimentalCoroutinesApi
 class GrilledCheeseViewModel(
     private val repository: RedditItemRepository,
-    private val dispatcher: DispatcherProvider = DefaultDispatcher()
+    private val dispatcher: DispatcherProvider = DefaultDispatcher(),
+    private val prefs: IntPersistence
 ) : ViewModel() {
 
     val imageUrl = MutableStateFlow("")
-    val dialogSelection = MutableStateFlow(-1)
+    private val dialogSelection = MutableStateFlow(prefs.read())
+
+    fun setDialogSelection(selection: Int) {
+        dialogSelection.value = selection
+        prefs.write(selection)
+    }
+
+    fun getDialogSelection(): Flow<Int> = dialogSelection
 
     @ExperimentalCoroutinesApi
     suspend fun getHotGrilledCheese(): Flow<Resource<GrilledCheese>> {
