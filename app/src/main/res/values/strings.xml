@@ -5,5 +5,15 @@
     <string name="set_random">Preview Random Grilled Cheese</string>
     <string name="set_background">Set Phone Background</string>
     <string name="preview_image_toast">Preview an image first</string>
+    <string name="set_image_worker">Set my background everyday</string>
+    <string name="cancel_set_image_worker">Cancel setting my background everyday</string>
     <string name="image_set">Wallpaper being set, enjoy!</string>
+    <string name="dialog_title">What type of grilled cheese do you want set?</string>
+    <string name="dialog_confirm">Confirm</string>
+    <string name="dialog_cancel">Cancel</string>
+
+    <string-array name="dialog_items">
+        <item>Random</item>
+        <item>Hot</item>
+    </string-array>
 </resources>

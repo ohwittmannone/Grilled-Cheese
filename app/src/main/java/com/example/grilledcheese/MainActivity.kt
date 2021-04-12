@@ -10,12 +10,12 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.grilledcheese.api.RedditAdapter
 import com.example.grilledcheese.model.GrilledCheeseViewModel
 import com.example.grilledcheese.model.RedditItemRepository
-import com.example.grilledcheese.utils.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.MainScope
+import com.example.grilledcheese.utils.Status
+import com.example.grilledcheese.utils.setGlideImage
+import com.example.grilledcheese.utils.setWallpaper
+import com.example.grilledcheese.utils.showLongToast
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
@@ -29,16 +29,17 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         val randomButton = this.findViewById<Button>(R.id.button_random)
         val spinner = this.findViewById<ProgressBar>(R.id.loading_spinner)
         val setBackgroundButton = this.findViewById<Button>(R.id.button_set_background)
+        val workerButton = this.findViewById<Button>(R.id.button_worker)
+        val cancelButton = this.findViewById<Button>(R.id.button_cancel)
 
         val repository = RedditItemRepository(RedditAdapter.create())
         val viewModel = GrilledCheeseViewModel(repository)
+        val dialog = SelectTypeDialog(this, viewModel)
 
-        hotButton.setOnClickListener {
-            setHotPreviewImage(viewModel, imagePreview, spinner)
-        }
-        randomButton.setOnClickListener {
-            setRandomPreviewImage(viewModel, imagePreview, spinner)
-        }
+        setButtonVisibility(viewModel, workerButton, cancelButton)
+
+        hotButton.setOnClickListener { setHotPreviewImage(viewModel, imagePreview, spinner) }
+        randomButton.setOnClickListener { setRandomPreviewImage(viewModel, imagePreview, spinner) }
 
         setBackgroundButton.setOnClickListener {
             if (viewModel.imageUrl.value != "") {
@@ -47,6 +48,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             } else {
                 showLongToast(this, R.string.preview_image_toast)
             }
+        }
+
+        cancelButton.setOnClickListener { viewModel.dialogSelection.value = CANCEL_SELECTION }
+        workerButton.setOnClickListener { dialog.show() }
+
+        launch {
+            handleDialogSelection(viewModel, this@MainActivity)
         }
     }
 
@@ -94,6 +102,27 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 spinner.visibility = GONE
                 imagePreview.visibility = VISIBLE
                 imagePreview.setImageResource(R.drawable.ic_baseline_error_outline_24)
+            }
+        }
+    }
+
+    private fun setButtonVisibility(
+        viewModel: GrilledCheeseViewModel,
+        workerButton: Button,
+        cancelButton: Button
+    ) {
+        launch {
+            viewModel.dialogSelection.collectLatest {
+                when (it) {
+                    CANCEL_SELECTION -> {
+                        workerButton.visibility = VISIBLE
+                        cancelButton.visibility = GONE
+                    }
+                    else -> {
+                        workerButton.visibility = GONE
+                        cancelButton.visibility = VISIBLE
+                    }
+                }
             }
         }
     }

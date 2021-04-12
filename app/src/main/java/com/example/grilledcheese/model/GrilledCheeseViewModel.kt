@@ -19,6 +19,7 @@ class GrilledCheeseViewModel(
 ) : ViewModel() {
 
     val imageUrl = MutableStateFlow("")
+    val dialogSelection = MutableStateFlow(-1)
 
     @ExperimentalCoroutinesApi
     suspend fun getHotGrilledCheese(): Flow<Resource<GrilledCheese>> {
@@ -26,7 +27,7 @@ class GrilledCheeseViewModel(
             withContext(dispatcher.main()) {
                 emit(Resource.loading())
                 try {
-                    val grilledCheese = checkHotGrilledCheese()
+                    val grilledCheese = setHotGrilledCheese()
                     imageUrl.value = grilledCheese.url
                     emit(Resource.success(grilledCheese))
                 } catch (e: Exception) {
@@ -41,7 +42,7 @@ class GrilledCheeseViewModel(
             withContext(dispatcher.main()) {
                 emit(Resource.loading())
                 try {
-                    val grilledCheese = checkRandomGrilledCheese()
+                    val grilledCheese = setRandomGrilledCheese()
                     imageUrl.value = grilledCheese.url
                     emit(Resource.success(grilledCheese))
                 } catch (e: Exception) {
@@ -55,20 +56,21 @@ class GrilledCheeseViewModel(
         return this.endsWith(".jpg") || this.endsWith(".png") || this.endsWith(".jpeg")
     }
 
-    private suspend fun checkHotGrilledCheese(): GrilledCheese {
+    private suspend fun setHotGrilledCheese(): GrilledCheese {
         for (child in repository.getHotRedditList().data.children) {
             if (child.grilledCheese.url.imageEnding()) return child.grilledCheese
         }
         return GrilledCheese("https://i.imgur.com/EK9tToe.jpg", "https://i.imgur.com/EK9tToe.jpg")
     }
 
-    private suspend fun checkRandomGrilledCheese(): RandomGrilledCheese {
+    private suspend fun setRandomGrilledCheese(): RandomGrilledCheese {
         val randomGrilledCheese =
             repository.getRandomReddit().first().data.children.first().randomGrilledCheese
         return if (randomGrilledCheese.url.imageEnding()) {
             randomGrilledCheese
         } else {
-            checkRandomGrilledCheese()
+            setRandomGrilledCheese()
         }
     }
+
 }

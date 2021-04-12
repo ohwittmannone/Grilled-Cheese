@@ -19,7 +19,8 @@ fun setGlideImage(view: ImageView, resUrl: String) {
 }
 
 @SuppressLint("CheckResult")
-fun setWallpaper(context: Context, resUrl: String) {
+fun setWallpaper(context: Context, resUrl: String): Boolean {
+    var isSuccessful = false
     val wallpaperManager = WallpaperManager.getInstance(context)
     Glide.with(context)
         .asBitmap()
@@ -42,9 +43,11 @@ fun setWallpaper(context: Context, resUrl: String) {
                 isFirstResource: Boolean
             ): Boolean {
                 wallpaperManager.setBitmap(resource)
+                isSuccessful = true
                 return true
             }
 
         })
         .preload()
+    return isSuccessful
 }
