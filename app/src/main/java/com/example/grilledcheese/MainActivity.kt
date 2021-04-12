@@ -9,14 +9,15 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import com.example.grilledcheese.api.RedditAdapter
+import com.example.grilledcheese.data.GrilledCheese
 import com.example.grilledcheese.model.GrilledCheeseViewModel
 import com.example.grilledcheese.model.RedditItemRepository
-import com.example.grilledcheese.utils.Status
-import com.example.grilledcheese.utils.setGlideImage
-import com.example.grilledcheese.utils.setWallpaper
-import com.example.grilledcheese.utils.showLongToast
-import kotlinx.coroutines.*
+import com.example.grilledcheese.utils.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 const val DIALOG_SELECTION = "DIALOG_SELECTION"
 
@@ -43,63 +44,47 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         val viewModel = GrilledCheeseViewModel(repository, prefs = dialogSelectionPrefs)
         val dialog = SelectTypeDialog(this, viewModel)
 
-        setButtonVisibility(viewModel, workerButton, cancelButton)
+        setWorkerButtonVisibility(viewModel, workerButton, cancelButton)
 
-        hotButton.setOnClickListener { setHotPreviewImage(viewModel, imagePreview, spinner) }
-        randomButton.setOnClickListener { setRandomPreviewImage(viewModel, imagePreview, spinner) }
-
+        hotButton.setOnClickListener { launch { viewModel.setHotGrilledCheese() } }
+        randomButton.setOnClickListener { launch { viewModel.setRandomGrilledCheese() } }
         setBackgroundButton.setOnClickListener {
-            if (viewModel.imageUrl.value != "") {
-                setWallpaper(this, viewModel.imageUrl.value)
+            if (viewModel.grilledCheese.value.data?.url != "") {
+                setWallpaper(this, viewModel.grilledCheese.value.data!!.url)
                 showLongToast(this, R.string.image_set)
             } else {
                 showLongToast(this, R.string.preview_image_toast)
             }
         }
-
-        cancelButton.setOnClickListener { viewModel.setDialogSelection(CANCEL_SELECTION)}
+        cancelButton.setOnClickListener { viewModel.setDialogSelection(CANCEL_SELECTION) }
         workerButton.setOnClickListener { dialog.show() }
 
-        launch {
-            handleDialogSelection(viewModel, this@MainActivity)
-        }
+        launch { setWallpaperWorker(viewModel, this@MainActivity) }
+        setPreviewImage(viewModel, imagePreview, spinner)
     }
 
-    private fun setHotPreviewImage(
+    private fun setPreviewImage(
         viewModel: GrilledCheeseViewModel,
         imagePreview: ImageView,
         spinner: ProgressBar
     ) {
         launch {
-            viewModel.getHotGrilledCheese().collectLatest {
-                setImage(it.status, imagePreview, spinner, it.data?.url)
-            }
-        }
-    }
-
-    private fun setRandomPreviewImage(
-        viewModel: GrilledCheeseViewModel,
-        imagePreview: ImageView,
-        spinner: ProgressBar
-    ) {
-        launch {
-            viewModel.getRandomGrilledCheese().collectLatest {
-                setImage(it.status, imagePreview, spinner, it.data?.url)
+            viewModel.grilledCheese.collectLatest {
+                setImage(it, imagePreview, spinner)
             }
         }
     }
 
     private fun setImage(
-        status: Status,
+        resource: Resource<GrilledCheese>,
         imagePreview: ImageView,
-        spinner: ProgressBar,
-        url: String? = ""
+        spinner: ProgressBar
     ) {
-        when (status) {
+        when (resource.status) {
             Status.SUCCESS -> {
                 spinner.visibility = GONE
                 imagePreview.visibility = VISIBLE
-                setGlideImage(imagePreview, url!!)
+                setGlideImage(imagePreview, resource.data!!.url)
             }
             Status.LOADING -> {
                 spinner.visibility = VISIBLE
@@ -113,7 +98,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         }
     }
 
-    private fun setButtonVisibility(
+    private fun setWorkerButtonVisibility(
         viewModel: GrilledCheeseViewModel,
         workerButton: Button,
         cancelButton: Button

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.appcompat.app.AlertDialog
 import androidx.work.WorkManager
 import com.example.grilledcheese.model.GrilledCheeseViewModel
+import com.example.grilledcheese.utils.showLongToast
 import com.example.grilledcheese.worker.startWorkManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
@@ -27,15 +28,11 @@ class SelectTypeDialog(
                 CANCEL_SELECTION
             ) { dialog, which ->
                 when (which) {
-                    RANDOM_SELECTION -> {
-                        model.setDialogSelection(RANDOM_SELECTION)
-                        dialog.dismiss()
-                    }
-                    HOT_SELECTION -> {
-                        model.setDialogSelection(HOT_SELECTION)
-                        dialog.dismiss()
-                    }
+                    RANDOM_SELECTION -> model.setDialogSelection(RANDOM_SELECTION)
+                    HOT_SELECTION -> model.setDialogSelection(HOT_SELECTION)
                 }
+                dialog.dismiss()
+                showLongToast(context, R.string.image_set)
             }
             .setNegativeButton(R.string.dialog_cancel) { dialog, _ -> dialog.cancel() }
             .create()
@@ -44,18 +41,16 @@ class SelectTypeDialog(
 }
 
 @ExperimentalCoroutinesApi
-suspend fun handleDialogSelection(viewModel: GrilledCheeseViewModel, context: Context) {
+suspend fun setWallpaperWorker(viewModel: GrilledCheeseViewModel, context: Context) {
     viewModel.getDialogSelection().collectLatest { selection ->
         when (selection) {
             RANDOM_SELECTION -> {
-                viewModel.getRandomGrilledCheese().collectLatest {
-                    startWorkManager(it.status, it.data?.url, context)
-                }
+                viewModel.setRandomGrilledCheese()
+                startWorkManager(viewModel.grilledCheese, context)
             }
             HOT_SELECTION -> {
-                viewModel.getHotGrilledCheese().collectLatest {
-                    startWorkManager(it.status, it.data?.url, context)
-                }
+                viewModel.setHotGrilledCheese()
+                startWorkManager(viewModel.grilledCheese, context)
             }
             CANCEL_SELECTION -> WorkManager.getInstance(context).cancelAllWork()
         }

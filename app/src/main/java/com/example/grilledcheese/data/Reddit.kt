@@ -7,7 +7,4 @@ data class Data(val children: List<Children>)
 
 data class Children(@SerializedName("data") val grilledCheese: GrilledCheese)
 
-data class GrilledCheese(
-    val url: String,
-    val url_overridden_by_dest: String
-)
+data class GrilledCheese(val url: String)
