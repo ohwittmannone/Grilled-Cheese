@@ -8,18 +8,23 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
-import com.example.grilledcheese.api.RedditAdapter
+import androidx.lifecycle.ViewModelProvider
+import androidx.work.WorkManager
 import com.example.grilledcheese.data.GrilledCheese
 import com.example.grilledcheese.model.GrilledCheeseViewModel
-import com.example.grilledcheese.model.RedditItemRepository
+import com.example.grilledcheese.model.GrilledCheeseViewModelFactory
 import com.example.grilledcheese.utils.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.MainScope
+import com.example.grilledcheese.worker.startWorkManager
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
-const val DIALOG_SELECTION = "DIALOG_SELECTION"
+private lateinit var imagePreview: ImageView
+private lateinit var hotButton: Button
+private lateinit var randomButton: Button
+private lateinit var setBackgroundButton: Button
+private lateinit var workerButton: Button
+private lateinit var cancelButton: Button
+private lateinit var spinner: ProgressBar
 
 @ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
@@ -28,23 +33,21 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val imagePreview = this.findViewById<ImageView>(R.id.preview_image)
-        val hotButton = this.findViewById<Button>(R.id.button_hot)
-        val randomButton = this.findViewById<Button>(R.id.button_random)
-        val spinner = this.findViewById<ProgressBar>(R.id.loading_spinner)
-        val setBackgroundButton = this.findViewById<Button>(R.id.button_set_background)
-        val workerButton = this.findViewById<Button>(R.id.button_worker)
-        val cancelButton = this.findViewById<Button>(R.id.button_cancel)
+        imagePreview = this.findViewById(R.id.preview_image)
+        hotButton = this.findViewById(R.id.button_hot)
+        randomButton = this.findViewById(R.id.button_random)
+        spinner = this.findViewById(R.id.loading_spinner)
+        setBackgroundButton = this.findViewById(R.id.button_set_background)
+        workerButton = this.findViewById(R.id.button_worker)
+        cancelButton = this.findViewById(R.id.button_cancel)
 
-        val dialogSelectionPrefs = IntPersistence(
-            DIALOG_SELECTION,
-            this.getSharedPreferences(DIALOG_SELECTION, Context.MODE_PRIVATE)
-        )
-        val repository = RedditItemRepository(RedditAdapter.create())
-        val viewModel = GrilledCheeseViewModel(repository, prefs = dialogSelectionPrefs)
+        val viewModel = ViewModelProvider(
+            this,
+            GrilledCheeseViewModelFactory(this)
+        ).get(GrilledCheeseViewModel::class.java)
         val dialog = SelectTypeDialog(this, viewModel)
 
-        setWorkerButtonVisibility(viewModel, workerButton, cancelButton)
+        setWorkerButtonVisibility(viewModel)
 
         hotButton.setOnClickListener { launch { viewModel.setHotGrilledCheese() } }
         randomButton.setOnClickListener { launch { viewModel.setRandomGrilledCheese() } }
@@ -59,27 +62,19 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         cancelButton.setOnClickListener { viewModel.setDialogSelection(CANCEL_SELECTION) }
         workerButton.setOnClickListener { dialog.show() }
 
-        launch { setWallpaperWorker(viewModel, this@MainActivity) }
-        setPreviewImage(viewModel, imagePreview, spinner)
+        setWallpaperWorker(viewModel, this@MainActivity)
+        setPreviewImage(viewModel)
     }
 
-    private fun setPreviewImage(
-        viewModel: GrilledCheeseViewModel,
-        imagePreview: ImageView,
-        spinner: ProgressBar
-    ) {
+    private fun setPreviewImage(viewModel: GrilledCheeseViewModel) {
         launch {
             viewModel.grilledCheese.collectLatest {
-                setImage(it, imagePreview, spinner)
+                setImage(it)
             }
         }
     }
 
-    private fun setImage(
-        resource: Resource<GrilledCheese>,
-        imagePreview: ImageView,
-        spinner: ProgressBar
-    ) {
+    private fun setImage(resource: Resource<GrilledCheese>) {
         when (resource.status) {
             Status.SUCCESS -> {
                 spinner.visibility = GONE
@@ -98,11 +93,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         }
     }
 
-    private fun setWorkerButtonVisibility(
-        viewModel: GrilledCheeseViewModel,
-        workerButton: Button,
-        cancelButton: Button
-    ) {
+    private fun setWorkerButtonVisibility(viewModel: GrilledCheeseViewModel) {
         launch {
             viewModel.getDialogSelection().collectLatest {
                 when (it) {
@@ -113,6 +104,26 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                     else -> {
                         workerButton.visibility = GONE
                         cancelButton.visibility = VISIBLE
+                    }
+                }
+            }
+        }
+    }
+
+    private fun setWallpaperWorker(viewModel: GrilledCheeseViewModel, context: Context) {
+        launch {
+            withContext(DefaultDispatcher().main()) {
+                viewModel.getDialogSelection().collectLatest { selection ->
+                    when (selection) {
+                        RANDOM_SELECTION -> {
+                            viewModel.setRandomGrilledCheese()
+                            startWorkManager(viewModel.grilledCheese, context)
+                        }
+                        HOT_SELECTION -> {
+                            viewModel.setHotGrilledCheese()
+                            startWorkManager(viewModel.grilledCheese, context)
+                        }
+                        CANCEL_SELECTION -> WorkManager.getInstance(context).cancelAllWork()
                     }
                 }
             }
