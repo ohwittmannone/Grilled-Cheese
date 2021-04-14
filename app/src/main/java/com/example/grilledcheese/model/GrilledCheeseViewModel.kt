@@ -14,7 +14,7 @@ class GrilledCheeseViewModel(
     private val prefs: IntPersistence
 ) : ViewModel() {
 
-    val grilledCheese = MutableStateFlow(Resource.success(GrilledCheese("")))
+    val grilledCheese = MutableStateFlow(Resource.initial<GrilledCheese>())
     private val dialogSelection = MutableStateFlow(prefs.read())
 
     fun setDialogSelection(selection: Int) {

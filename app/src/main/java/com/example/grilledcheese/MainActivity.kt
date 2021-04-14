@@ -2,8 +2,7 @@ package com.example.grilledcheese
 
 import android.content.Context
 import android.os.Bundle
-import android.view.View.GONE
-import android.view.View.VISIBLE
+import android.view.View.*
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -47,7 +46,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         ).get(GrilledCheeseViewModel::class.java)
         val dialog = SelectTypeDialog(this, viewModel)
 
-        setWorkerButtonVisibility(viewModel)
+        setWorkerButtonVisibility(viewModel, this)
 
         hotButton.setOnClickListener { launch { viewModel.setHotGrilledCheese() } }
         randomButton.setOnClickListener { launch { viewModel.setRandomGrilledCheese() } }
@@ -62,7 +61,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         cancelButton.setOnClickListener { viewModel.setDialogSelection(CANCEL_SELECTION) }
         workerButton.setOnClickListener { dialog.show() }
 
-        setWallpaperWorker(viewModel, this@MainActivity)
         setPreviewImage(viewModel)
     }
 
@@ -85,6 +83,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 spinner.visibility = VISIBLE
                 imagePreview.visibility = GONE
             }
+            Status.INITIAL -> {
+                spinner.visibility = GONE
+                imagePreview.visibility = GONE
+            }
             else -> {
                 spinner.visibility = GONE
                 imagePreview.visibility = VISIBLE
@@ -93,13 +95,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         }
     }
 
-    private fun setWorkerButtonVisibility(viewModel: GrilledCheeseViewModel) {
+    private fun setWorkerButtonVisibility(viewModel: GrilledCheeseViewModel, context: Context) {
         launch {
             viewModel.getDialogSelection().collectLatest {
                 when (it) {
                     CANCEL_SELECTION -> {
                         workerButton.visibility = VISIBLE
                         cancelButton.visibility = GONE
+                        setWallpaperWorker(viewModel, context)
                     }
                     else -> {
                         workerButton.visibility = GONE

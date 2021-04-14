@@ -6,6 +6,8 @@ data class Resource<out T>(
 
     companion object {
 
+        fun <T> initial(data: T? = null) = Resource(Status.INITIAL, data)
+
         fun <T> success(data: T): Resource<T> = Resource(Status.SUCCESS, data)
 
         fun <T> loading(data: T? = null): Resource<T> = Resource(Status.LOADING, data)
@@ -15,4 +17,4 @@ data class Resource<out T>(
     }
 }
 
-enum class Status { SUCCESS, LOADING, ERROR }
+enum class Status { SUCCESS, LOADING, ERROR, INITIAL }
