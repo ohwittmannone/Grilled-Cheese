@@ -2,16 +2,15 @@ package com.example.grilledcheese.worker
 
 import android.content.Context
 import androidx.work.*
-import com.example.grilledcheese.data.GrilledCheese
-import com.example.grilledcheese.utils.Resource
+import com.example.grilledcheese.model.GrilledCheeseViewModel
 import com.example.grilledcheese.utils.Status
 import com.example.grilledcheese.utils.setWallpaper
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import retrofit2.HttpException
 import java.util.concurrent.TimeUnit
 
 const val RES_URL = "RES_URL"
+private const val WALLPAPER_WORKER_TAG = "WALLPAPER_DAILY"
 
 class WallpaperWorker(
     context: Context,
@@ -34,21 +33,34 @@ class WallpaperWorker(
     }
 }
 
-suspend fun startWorkManager(resource: Flow<Resource<GrilledCheese>>, context: Context) {
-    resource.collectLatest {
-        if (it.status == Status.SUCCESS) {
-            val workerConstraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build()
-
-            val repeatingRequest =
-                PeriodicWorkRequestBuilder<WallpaperWorker>(1, TimeUnit.DAYS)
-                    .setConstraints(workerConstraints)
-                    .setInputData(
-                        Data.Builder().putString(RES_URL, it.data?.url).build()
-                    )
-                    .build()
-            WorkManager.getInstance(context).enqueue(repeatingRequest)
-        }
+@ExperimentalCoroutinesApi
+suspend fun startWorkManager(
+    model: GrilledCheeseViewModel,
+    context: Context,
+    type: SelectionType
+): String {
+    val url = if (type == SelectionType.RANDOM) {
+        model.getRandomGrilledCheeseUrl()
+    } else {
+        model.getHotGrilledCheeseUrl()
     }
+    val workerConstraints = Constraints.Builder()
+        .setRequiredNetworkType(NetworkType.CONNECTED)
+        .build()
+
+    val repeatingRequest =
+        PeriodicWorkRequestBuilder<WallpaperWorker>(15, TimeUnit.MINUTES)
+            .setConstraints(workerConstraints)
+            .setInputData(Data.Builder().putString(RES_URL, url).build())
+            .addTag(WALLPAPER_WORKER_TAG)
+            .build()
+    WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+        WALLPAPER_WORKER_TAG,
+        ExistingPeriodicWorkPolicy.REPLACE,
+        repeatingRequest
+    )
+
+    return url
 }
+
+enum class SelectionType { RANDOM, HOT }

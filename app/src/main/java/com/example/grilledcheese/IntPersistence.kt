@@ -9,7 +9,7 @@ class IntPersistence(
     private val key: String,
     private val pref: SharedPreferences
 ) : ReadWriteProperty<Any?, Int>, OnDiskPersistence<Int> {
-    override fun read() = pref.getInt(key, 0)
+    override fun read() = pref.getInt(key, CANCEL_SELECTION)
 
     override fun write(item: Int) = pref.edit { putInt(key, item) }
 

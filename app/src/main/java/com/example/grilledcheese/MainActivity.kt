@@ -13,6 +13,7 @@ import com.example.grilledcheese.data.GrilledCheese
 import com.example.grilledcheese.model.GrilledCheeseViewModel
 import com.example.grilledcheese.model.GrilledCheeseViewModelFactory
 import com.example.grilledcheese.utils.*
+import com.example.grilledcheese.worker.SelectionType
 import com.example.grilledcheese.worker.startWorkManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
@@ -119,12 +120,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
                 viewModel.getDialogSelection().collectLatest { selection ->
                     when (selection) {
                         RANDOM_SELECTION -> {
-                            viewModel.setRandomGrilledCheese()
-                            startWorkManager(viewModel.grilledCheese, context)
+                            viewModel.grilledCheese.value = Resource.loading()
+                            val url = startWorkManager(viewModel, context, SelectionType.RANDOM)
+                            viewModel.grilledCheese.value = Resource.success(GrilledCheese(url))
                         }
                         HOT_SELECTION -> {
-                            viewModel.setHotGrilledCheese()
-                            startWorkManager(viewModel.grilledCheese, context)
+                            viewModel.grilledCheese.value = Resource.loading()
+                            val url = startWorkManager(viewModel, context, SelectionType.HOT)
+                            viewModel.grilledCheese.value = Resource.success(GrilledCheese(url))
                         }
                         CANCEL_SELECTION -> WorkManager.getInstance(context).cancelAllWork()
                     }

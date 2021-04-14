@@ -24,6 +24,13 @@ class GrilledCheeseViewModel(
 
     fun getDialogSelection(): Flow<Int> = dialogSelection
 
+    suspend fun getHotGrilledCheeseUrl(): String {
+        repository.getHotRedditList().data.children.forEach { child ->
+            if (child.grilledCheese.url.imageEnding()) return child.grilledCheese.url
+        }
+        return "https://i.imgur.com/EK9tToe.jpg"
+    }
+
     suspend fun setHotGrilledCheese() {
         grilledCheese.value = Resource.loading()
         for (child in repository.getHotRedditList().data.children) {
@@ -34,12 +41,14 @@ class GrilledCheeseViewModel(
         }
     }
 
+    suspend fun getRandomGrilledCheeseUrl(): String =
+        repository.getRandomReddit().first().data.children.first().randomGrilledCheese.url
+
     suspend fun setRandomGrilledCheese() {
         grilledCheese.value = Resource.loading()
-        val randomGrilledCheese =
-            repository.getRandomReddit().first().data.children.first().randomGrilledCheese
-        if (randomGrilledCheese.url.imageEnding()) {
-            val item = GrilledCheese(randomGrilledCheese.url)
+        val url = getRandomGrilledCheeseUrl()
+        if (url.imageEnding()) {
+            val item = GrilledCheese(url)
             grilledCheese.value = Resource.success(item)
         } else {
             setRandomGrilledCheese()
