@@ -33,12 +33,13 @@
         android:layout_marginTop="16dp"
         android:layout_marginRight="16dp"
         android:text="@string/app_welcome"
+        android:textColor="?colorOnPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/button_hot"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -46,17 +47,22 @@
         android:text="@string/set_hot"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/welcome_text" />
+        app:layout_constraintTop_toBottomOf="@id/welcome_text"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        app:strokeColor="?colorPrimary"
+        android:textColor="?colorOnPrimary"/>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/button_random"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:text="@string/set_random"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_hot" />
+        app:layout_constraintTop_toBottomOf="@id/button_hot"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        app:strokeColor="?colorPrimary"
+        android:textColor="?colorOnPrimary"/>
 
     <Button
         android:id="@+id/button_worker"
