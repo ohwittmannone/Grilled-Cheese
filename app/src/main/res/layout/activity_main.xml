@@ -64,24 +64,24 @@
         app:strokeColor="?colorPrimary"
         android:textColor="?colorOnPrimary"/>
 
-    <Button
-        android:id="@+id/button_worker"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/set_image_worker"
-        app:layout_constraintBottom_toTopOf="@id/button_set_background"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+<!--    <Button-->
+<!--        android:id="@+id/button_worker"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="@string/set_image_worker"-->
+<!--        app:layout_constraintBottom_toTopOf="@id/button_set_background"-->
+<!--        app:layout_constraintLeft_toLeftOf="parent"-->
+<!--        app:layout_constraintRight_toRightOf="parent" />-->
 
-    <Button
-        android:id="@+id/button_cancel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/cancel_set_image_worker"
-        app:layout_constraintBottom_toTopOf="@id/button_set_background"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:visibility="gone"/>
+<!--    <Button-->
+<!--        android:id="@+id/button_cancel"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="@string/cancel_set_image_worker"-->
+<!--        app:layout_constraintBottom_toTopOf="@id/button_set_background"-->
+<!--        app:layout_constraintLeft_toLeftOf="parent"-->
+<!--        app:layout_constraintRight_toRightOf="parent"-->
+<!--        android:visibility="gone"/>-->
 
     <Button
         android:id="@+id/button_set_background"

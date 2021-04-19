@@ -1,6 +1,5 @@
 package com.example.grilledcheese
 
-import android.content.Context
 import android.os.Bundle
 import android.view.View.*
 import android.widget.Button
@@ -8,15 +7,15 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import androidx.work.WorkManager
 import com.example.grilledcheese.data.GrilledCheese
 import com.example.grilledcheese.model.GrilledCheeseViewModel
 import com.example.grilledcheese.model.GrilledCheeseViewModelFactory
 import com.example.grilledcheese.utils.*
-import com.example.grilledcheese.worker.SelectionType
-import com.example.grilledcheese.worker.startWorkManager
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 private lateinit var imagePreview: ImageView
 private lateinit var hotButton: Button
@@ -38,8 +37,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         randomButton = this.findViewById(R.id.button_random)
         spinner = this.findViewById(R.id.loading_spinner)
         setBackgroundButton = this.findViewById(R.id.button_set_background)
-        workerButton = this.findViewById(R.id.button_worker)
-        cancelButton = this.findViewById(R.id.button_cancel)
+//        workerButton = this.findViewById(R.id.button_worker)
+//        cancelButton = this.findViewById(R.id.button_cancel)
 
         val viewModel = ViewModelProvider(
             this,
@@ -47,7 +46,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         ).get(GrilledCheeseViewModel::class.java)
         val dialog = SelectTypeDialog(this, viewModel)
 
-        setWorkerButtonVisibility(viewModel, this)
+//        setWorkerButtonVisibility(viewModel, this)
 
         hotButton.setOnClickListener { launch { viewModel.setHotGrilledCheese() } }
         randomButton.setOnClickListener { launch { viewModel.setRandomGrilledCheese() } }
@@ -96,43 +95,43 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         }
     }
 
-    private fun setWorkerButtonVisibility(viewModel: GrilledCheeseViewModel, context: Context) {
-        launch {
-            viewModel.getDialogSelection().collectLatest {
-                when (it) {
-                    CANCEL_SELECTION -> {
-                        workerButton.visibility = VISIBLE
-                        cancelButton.visibility = GONE
-                        setWallpaperWorker(viewModel, context)
-                    }
-                    else -> {
-                        workerButton.visibility = GONE
-                        cancelButton.visibility = VISIBLE
-                    }
-                }
-            }
-        }
-    }
+//    private fun setWorkerButtonVisibility(viewModel: GrilledCheeseViewModel, context: Context) {
+//        launch {
+//            viewModel.getDialogSelection().collectLatest {
+//                when (it) {
+//                    CANCEL_SELECTION -> {
+//                        workerButton.visibility = VISIBLE
+//                        cancelButton.visibility = GONE
+//                        setWallpaperWorker(viewModel, context)
+//                    }
+//                    else -> {
+//                        workerButton.visibility = GONE
+//                        cancelButton.visibility = VISIBLE
+//                    }
+//                }
+//            }
+//        }
+//    }
 
-    private fun setWallpaperWorker(viewModel: GrilledCheeseViewModel, context: Context) {
-        launch {
-            withContext(DefaultDispatcher().main()) {
-                viewModel.getDialogSelection().collectLatest { selection ->
-                    when (selection) {
-                        RANDOM_SELECTION -> {
-                            viewModel.grilledCheese.value = Resource.loading()
-                            val url = startWorkManager(viewModel, context, SelectionType.RANDOM)
-                            viewModel.grilledCheese.value = Resource.success(GrilledCheese(url))
-                        }
-                        HOT_SELECTION -> {
-                            viewModel.grilledCheese.value = Resource.loading()
-                            val url = startWorkManager(viewModel, context, SelectionType.HOT)
-                            viewModel.grilledCheese.value = Resource.success(GrilledCheese(url))
-                        }
-                        CANCEL_SELECTION -> WorkManager.getInstance(context).cancelAllWork()
-                    }
-                }
-            }
-        }
-    }
+//    private fun setWallpaperWorker(viewModel: GrilledCheeseViewModel, context: Context) {
+//        launch {
+//            withContext(DefaultDispatcher().main()) {
+//                viewModel.getDialogSelection().collectLatest { selection ->
+//                    when (selection) {
+//                        RANDOM_SELECTION -> {
+//                            viewModel.grilledCheese.value = Resource.loading()
+//                            val url = startWorkManager(viewModel, context, SelectionType.RANDOM)
+//                            viewModel.grilledCheese.value = Resource.success(GrilledCheese(url))
+//                        }
+//                        HOT_SELECTION -> {
+//                            viewModel.grilledCheese.value = Resource.loading()
+//                            val url = startWorkManager(viewModel, context, SelectionType.HOT)
+//                            viewModel.grilledCheese.value = Resource.success(GrilledCheese(url))
+//                        }
+//                        CANCEL_SELECTION -> WorkManager.getInstance(context).cancelAllWork()
+//                    }
+//                }
+//            }
+//        }
+//    }
 }
